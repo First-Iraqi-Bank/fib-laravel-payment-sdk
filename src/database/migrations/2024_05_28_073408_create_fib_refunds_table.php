@@ -4,12 +4,12 @@
     use Illuminate\Database\Schema\Blueprint;
     use Illuminate\Support\Facades\Schema;
 
-    return new class extends Migration
+    class CreateFibRefundsTable extends Migration
     {
         public function up(): void
         {
             Schema::create('fib_refunds', function (Blueprint $table) {
-                $table->id();
+                $table->increments('id'); // Use increments for older Laravel versions
                 $table->unsignedBigInteger('payment_id');
                 $table->string('fib_trace_id')->nullable();
                 $table->string('status')->default('PENDING')->index();
@@ -28,4 +28,4 @@
         {
             Schema::dropIfExists('fib_refunds');
         }
-    };
+    }
