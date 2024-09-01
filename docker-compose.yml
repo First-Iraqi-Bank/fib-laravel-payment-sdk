@@ -1,0 +1,22 @@
+services:
+    php:
+        image: php:8.0-fpm
+        container_name: php-app
+        working_dir: /var/www/html
+        volumes:
+            - ./:/var/www/html
+        ports:
+            - "9000:9000"
+        networks:
+            - app-network
+        environment:
+            - COMPOSER_ALLOW_SUPERUSER=1
+        command: php-fpm
+        # Install Composer during container build
+        build:
+            context: .
+            dockerfile: Dockerfile
+
+networks:
+    app-network:
+        driver: bridge
