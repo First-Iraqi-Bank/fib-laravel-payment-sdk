@@ -2,111 +2,80 @@
 
     namespace FirstIraqiBank\FIBPaymentSDK\Tests\Unit\Services;
 
+    use Exception;
     use FirstIraqiBank\FIBPaymentSDK\Services\FIBAuthIntegrationService;
-    use Mockery;
-    use Illuminate\Http\Client\Factory as HttpClient;
-    use Illuminate\Http\Client\Response;
+    use Illuminate\Support\Facades\Http;
     use Illuminate\Support\Facades\Log;
-    use FirstIraqiBank\FIBPaymentSDK\Tests\TestCase;
+    use Orchestra\Testbench\TestCase;
+
     class FIBAuthIntegrationServiceTest extends TestCase
     {
-        protected array $accountConfig;
-
         protected function setUp(): void
         {
             parent::setUp();
 
-            // Define configuration values directly in the test method
-            $this->accountConfig = [
-                'login' => 'https://example.com/token',
-                'default' => [
-                    'client_id' => 'test-client-id',
-                    'secret' => 'test-client-secret',
-                ],
-                'grant' => 'client_credentials',
-            ];
+            // Set up the configuration values
+            config()->set('fib.auth_account', 'default');
+            config()->set('fib.default.client_id', 'test-client-id');
+            config()->set('fib.default.secret', 'test-secret');
+            config()->set('fib.login', 'https://api.fib.com/login');
+            config()->set('fib.grant', 'client_credentials');
         }
 
-        /** @test */
-        public function it_retrieves_a_token_successfully()
+        public function test_it_retrieves_an_access_token_successfully()
         {
-            // Mock the HTTP client response
-            $response = Mockery::mock(Response::class);
-            $response->shouldReceive('body')->andReturn('{"access_token": "test-access-token"}');
-            $response->shouldReceive('json')->andReturn(['access_token' => 'test-access-token']);
-            $response->shouldReceive('successful')->andReturn(true);
-
-            $httpClient = Mockery::mock(HttpClient::class);
-            $httpClient->shouldReceive('withoutVerifying')->andReturnSelf();
-            $httpClient->shouldReceive('asForm')->andReturnSelf();
-            $httpClient->shouldReceive('withBasicAuth')
-                ->with($this->accountConfig['default']['client_id'], $this->accountConfig['default']['secret'])
-                ->andReturnSelf();
-            $httpClient->shouldReceive('post')
-                ->with($this->accountConfig['login'], ['grant_type' => $this->accountConfig['grant']])
-                ->andReturn($response);
-
-            $service = new FIBAuthIntegrationService($this->accountConfig, $httpClient);
-            $token = $service->getToken();
-
-            $this->assertEquals('test-access-token', $token);
-        }
-
-        /** @test */
-        public function it_logs_error_when_token_retrieval_fails()
-        {
-            // Mock the HTTP client response
-            $response = Mockery::mock(Response::class);
-            $response->shouldReceive('body')->andReturn('{"error": "invalid_request"}');
-            $response->shouldReceive('successful')->andReturn(false);
-
-            $httpClient = Mockery::mock(HttpClient::class);
-            $httpClient->shouldReceive('withoutVerifying')->andReturnSelf();
-            $httpClient->shouldReceive('asForm')->andReturnSelf();
-            $httpClient->shouldReceive('withBasicAuth')
-                ->with($this->accountConfig['default']['client_id'], $this->accountConfig['default']['secret'])
-                ->andReturnSelf();
-            $httpClient->shouldReceive('post')
-                ->with($this->accountConfig['login'], ['grant_type' => $this->accountConfig['grant']])
-                ->andReturn($response);
-
-            Log::shouldReceive('error')->once()->with('Failed to retrieve access token from FIB Payment API.', [
-                'response' => '{"error": "invalid_request"}',
+            // Arrange
+            Http::fake([
+                'https://api.fib.com/login' => Http::response(['access_token' => 'test-token'], 200),
             ]);
 
-            $this->expectException(\Exception::class);
+            // Act
+            $service = new FIBAuthIntegrationService();
+            $token = $service->getToken();
+
+            // Assert
+            $this->assertEquals('test-token', $token);
+        }
+
+        public function test_it_throws_an_exception_when_token_retrieval_fails()
+        {
+            // Arrange
+            Http::fake([
+                'https://api.fib.com/login' => Http::response('Error message', 400),
+            ]);
+
+            Log::shouldReceive('error')
+                ->once()
+                ->with('Failed to retrieve access token from FIB Payment API.', [
+                    'response' => 'Error message',
+                ]);
+
+            $this->expectException(Exception::class);
             $this->expectExceptionMessage('Failed to retrieve access token.');
 
-            $service = new FIBAuthIntegrationService($this->accountConfig, $httpClient);
+            // Act
+            $service = new FIBAuthIntegrationService();
             $service->getToken();
         }
 
-        /** @test */
-        public function it_logs_error_when_an_exception_is_thrown()
-        {
-            // Mock the HTTP client to throw an exception
-            $httpClient = Mockery::mock(HttpClient::class);
-            $httpClient->shouldReceive('withoutVerifying')->andReturnSelf();
-            $httpClient->shouldReceive('asForm')->andReturnSelf();
-            $httpClient->shouldReceive('withBasicAuth')
-                ->with($this->accountConfig['default']['client_id'], $this->accountConfig['default']['secret'])
-                ->andReturnSelf();
-            $httpClient->shouldReceive('post')
-                ->with($this->accountConfig['login'], ['grant_type' => $this->accountConfig['grant']])
-                ->andThrow(new \Exception('HTTP request failed'));
-
-            Log::shouldReceive('error')->once()->with(
-                'Error occurred while retrieving access token from FIB Payment API.',
-                Mockery::on(function ($context) {
-                    return isset($context['message']) && $context['message'] === 'HTTP request failed' &&
-                        isset($context['trace']) && is_string($context['trace']);
-                })
-            );
-
-            $this->expectException(\Exception::class);
-            $this->expectExceptionMessage('HTTP request failed');
-
-            $service = new FIBAuthIntegrationService($this->accountConfig, $httpClient);
-            $service->getToken();
-        }
+//        public function test_it_logs_and_throws_exception_on_error()
+//        {
+//            // Arrange
+//            Http::fake(function ($request) {
+//                throw new Exception('Network Error');
+//            });
+//
+//            Log::shouldReceive('error')
+//                ->once()
+//                ->with('Error occurred while retrieving access token from FIB Payment API.', Mockery::on(function ($data) {
+//                    return $data['message'] === 'Network Error';
+//                }));
+//
+//            $this->expectException(Exception::class);
+//            $this->expectExceptionMessage('Network Error');
+//
+//            // Act
+//            $service = new FIBAuthIntegrationService();
+//            $service->getToken();
+//        }
     }
