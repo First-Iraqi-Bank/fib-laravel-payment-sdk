@@ -1,37 +1,45 @@
 <?php
 
-namespace FirstIraqiBank\FIBPaymentSDK\Services;
+    namespace FirstIraqiBank\FIBPaymentSDK\Services;
 
+    use Exception;
+    use FirstIraqiBank\FIBPaymentSDK\Model\FibPayment;
+    use FirstIraqiBank\FIBPaymentSDK\Model\FibRefund;
+    use FirstIraqiBank\FIBPaymentSDK\Services\Contracts\FIBPaymentIntegrationServiceInterface;
+    use Illuminate\Database\Eloquent\Builder;
+    use Illuminate\Database\Eloquent\Model;
+    use Illuminate\Support\Facades\Http;
+    use Illuminate\Support\Facades\Log;
 
-use Exception;
-use FirstIraqiBank\FIBPaymentSDK\Model\FibPayment;
-use FirstIraqiBank\FIBPaymentSDK\Model\FibRefund;
-use FirstIraqiBank\FIBPaymentSDK\Services\Contracts\FIBPaymentIntegrationServiceInterface;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
+    class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterface
+    {
+        protected $baseUrl;
 
-class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterface
-{
-    protected string $baseUrl;
+        // Declare properties
+        protected $fibPaymentRepository;
+        protected $fibAuthIntegrationService;
 
         public function __construct(
-            private readonly FIBPaymentRepositoryService $fibPaymentRepository,
-            private readonly FIBAuthIntegrationService   $fibAuthIntegrationService
+            FIBPaymentRepositoryService $fibPaymentRepository,
+            FIBAuthIntegrationService $fibAuthIntegrationService
         )
         {
+            // Assign properties
+            $this->fibPaymentRepository = $fibPaymentRepository;
+            $this->fibAuthIntegrationService = $fibAuthIntegrationService;
             $this->baseUrl = config('fib.base_url');
         }
 
         /**
          * @throws Exception
          */
-        private function postRequest(string $url, array $data)
+        private function postRequest($url, array $data)
         {
             $token = $this->fibAuthIntegrationService->getToken();
             $response = retry(3, function () use ($url, $data, $token) {
-                return Http::withoutVerifying()->asJson()
+                return Http::withOptions([
+                    'verify' => false, // Disable SSL verification
+                ])->asJson()
                     ->withToken($token)
                     ->post($url, $data);
             }, 100);
@@ -42,7 +50,7 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
                     'data' => $data,
                     'response' => $response->body(),
                 ]);
-              //  throw new Exception('Failed to post request due to : '. $response->body());
+                throw new Exception('Failed to post request.');
             }
             return $response;
         }
@@ -50,12 +58,13 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
         /**
          * @throws Exception
          */
-        private function getRequest(string $url)
+        private function getRequest($url)
         {
             $token = $this->fibAuthIntegrationService->getToken();
             $response = retry(3, function () use ($url, $token) {
-                return Http::withoutVerifying()
-                    ->withToken($token)
+                return Http::withOptions([
+                    'verify' => false, // Disable SSL verification
+                ])->withToken($token)
                     ->get($url);
             }, 100);
 
@@ -73,10 +82,10 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
         /**
          * @throws Exception
          */
-        public function createPayment(int $amount, string $callback = null, string $description = null): Model|Builder
+        public function createPayment($amount, $callback = null, $description = null)
         {
             $data = $this->getPaymentData($amount, $callback, $description);
-            $paymentData = $this->postRequest(url: "{$this->baseUrl}/payments", data: $data);
+            $paymentData = $this->postRequest("{$this->baseUrl}/payments", $data);
             return $this->fibPaymentRepository->createPayment($paymentData->json(), $amount);
         }
 
@@ -85,17 +94,17 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
          */
         public function checkPaymentStatus($paymentId)
         {
-            $status = $this->getRequest(url: "{$this->baseUrl}/payments/{$paymentId}/status")['status'];
+            $status = $this->getRequest("{$this->baseUrl}/payments/{$paymentId}/status")['status'];
             $this->fibPaymentRepository->updatePaymentStatus($paymentId, $status);
             return $status;
         }
 
-        public function handleCallback(string $paymentId,  string $status): void
+        public function handleCallback($paymentId, $status)
         {
-            $this->fibPaymentRepository->updatePaymentStatus(paymentId: $paymentId, status: $status);
+            $this->fibPaymentRepository->updatePaymentStatus($paymentId, $status);
         }
 
-        public function getPaymentData(int $amount, string $callback = null, $description = null): array
+        public function getPaymentData($amount, $callback = null, $description = null)
         {
             return [
                 'monetaryValue' => [
@@ -103,33 +112,27 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
                     'currency' => config('fib.currency'),
                 ],
                 'statusCallbackUrl' => $callback ?? config('fib.callback'),
-                'description' => $description?? '',
+                'description' => $description ?? '',
                 'refundableFor' => config('fib.refundable_for'),
             ];
         }
 
-        public function refund(string $paymentId): void
+        public function refund($paymentId)
         {
-
-            $response=  $this->postRequest(url: "{$this->baseUrl}/payments/{$paymentId}/refund", data: []);
-
+            $response = $this->postRequest("{$this->baseUrl}/payments/{$paymentId}/refund", []);
             if ($response->status() == 202) {
-
                 $refundData = [
                     'status' => FibRefund::SUCCESS,
                 ];
-                $this->fibPaymentRepository->updateOrCreateRefund(paymentId: $paymentId, refundData: $refundData);
-                $this->fibPaymentRepository->updatePaymentStatus(paymentId: $paymentId, status: FibPayment::REFUNDED);
-            }
-            else {
+                $this->fibPaymentRepository->updateOrCreateRefund($paymentId, $refundData);
+                $this->fibPaymentRepository->updatePaymentStatus($paymentId, FibPayment::REFUNDED);
+            } else {
                 $refundData = [
                     'fib_trace_id' => $response['traceId'],
                     'refund_failure_reason' => implode(', ', array_column($response['errors'], 'code')),
                     'status' => FibRefund::FAILED,
                 ];
-                $this->fibPaymentRepository->updateOrCreateRefund(paymentId: $paymentId, refundData: $refundData);
-
+                $this->fibPaymentRepository->updateOrCreateRefund($paymentId, $refundData);
             }
-
         }
     }
