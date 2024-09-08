@@ -12,9 +12,9 @@ on:
 #      - .github/workflows/ci.yml
 #      - .github/workflows/release.yml
 
-  pull_request:
-    branches:
-      - main
+#  pull_request:
+#    branches:
+#      - main
 
 
 jobs:
