@@ -68,6 +68,6 @@ jobs:
 
       - name: Push changes and create tag
         run: |
-          git push origin main
+          git push origin workflow
           git tag -a "v${{ env.NEW_VERSION }}" -m "Release ${{ env.NEW_VERSION }}"
           git push origin "v${{ env.NEW_VERSION }}"
