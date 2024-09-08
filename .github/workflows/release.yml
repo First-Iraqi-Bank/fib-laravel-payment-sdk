@@ -1,14 +1,17 @@
 name: Release
 
 on:
-  push:
-    branches:
-      - main
-      - workflow
-
-
-
-
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: "New version type"
+        required: true
+        default: "patch"
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
 
 jobs:
   release:
@@ -17,7 +20,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: workflow  # Ensure we start from the main branch
+          ref: main  # Ensure we start from the main branch
 
       - name: Configure Git
         run: |
@@ -36,14 +39,11 @@ jobs:
         id: bump_version
         run: |
           CURRENT_VERSION=$(jq -r '.version' composer.json)
-
-
-          VERSION_TYPE=patch
+          VERSION_TYPE=${{ github.event.inputs.version_type }}
           IFS='.' read -r -a version_parts <<< "$CURRENT_VERSION"
           major=${version_parts[0]}
           minor=${version_parts[1]}
           patch=${version_parts[2]}
-
           if [[ "$VERSION_TYPE" == "patch" ]]; then
             patch=$((patch + 1))
           elif [[ "$VERSION_TYPE" == "minor" ]]; then
@@ -68,6 +68,6 @@ jobs:
 
       - name: Push changes and create tag
         run: |
-          git push origin workflow
+          git push origin main
           git tag -a "v${{ env.NEW_VERSION }}" -m "Release ${{ env.NEW_VERSION }}"
           git push origin "v${{ env.NEW_VERSION }}"

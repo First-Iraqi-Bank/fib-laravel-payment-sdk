@@ -5,22 +5,13 @@ on:
     branches:
       - '**'
 
-#    paths-ignore:
-#      - README.md
-#      - .github/CODEOWNERS
-#      - .github/dependabot.yml
-#      - .github/workflows/ci.yml
-#      - .github/workflows/release.yml
-
-#  pull_request:
-#    branches:
-#      - main
-
-
 jobs:
   unit-tests:
     name: Run Unit Tests
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-version: ['7.4', '8.0', '8.1', '8.2']  # Define the PHP versions you want to test
 
     steps:
       - name: Checkout code
@@ -29,7 +20,7 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.1'
+          php-version: ${{ matrix.php-version }}  # Use the PHP version from the matrix
           extensions: mbstring, intl, pcntl, pdo, pdo_mysql
           coverage: none
 
