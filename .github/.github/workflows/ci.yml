@@ -5,12 +5,12 @@ on:
     branches:
       - '**'
 
-    paths-ignore:
-      - README.md
-      - .github/CODEOWNERS
-      - .github/dependabot.yml
-      - .github/workflows/ci.yml
-      - .github/workflows/release.yml
+#    paths-ignore:
+#      - README.md
+#      - .github/CODEOWNERS
+#      - .github/dependabot.yml
+#      - .github/workflows/ci.yml
+#      - .github/workflows/release.yml
 
   pull_request:
     branches:
