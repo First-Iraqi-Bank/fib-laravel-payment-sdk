@@ -1,58 +1,58 @@
 {
-    "name": "first-iraqi-bank/fib-payment-sdk",
-    "description": "SDK for integrating with the FIB payment system, enabling user authentication and payment transactions.",
-    "version": "0.0.1",
-    "type": "library",
-    "keywords": [
-        "sdk",
-        "fib",
-        "payment",
-        "integration"
-    ],
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Gateway ICT",
-            "email": "info@the-gw.com",
-            "homepage": "https://the-gw.com/"
-        }
-    ],
-    "minimum-stability": "dev",
-    "require": {
-        "php": "^7.4|^8.0",
-        "ext-json": "*",
-        "guzzlehttp/guzzle": "^6.3|^7.0",
-        "illuminate/contracts": "^7.0|^8.0",
-        "illuminate/http": "^7.0|^8.0",
-        "illuminate/support": "^7.0|^8.0"
-    },
-    "require-dev": {
-        "mockery/mockery": "^1.4",
-        "orchestra/testbench": "^6.0",
-        "phpunit/phpunit": "^8.5|^9.5",
-        "laravel/legacy-factories": "^1.1"
-    },
-    "autoload": {
-        "psr-4": {
-            "FirstIraqiBank\\FIBPaymentSDK\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "FirstIraqiBank\\FIBPaymentSDK\\Tests\\": "tests/"
-        }
-    },
-    "config": {
-        "sort-packages": true
-    },
-    "scripts": {
-        "test": "phpunit"
-    },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "FirstIraqiBank\\FIBPaymentSDK\\FIBPaymentServiceProvider"
-            ]
-        }
+  "name": "first-iraqi-bank/fib-payment-sdk",
+  "description": "SDK for integrating with the FIB payment system, enabling user authentication and payment transactions.",
+  "version": "0.0.2",
+  "type": "library",
+  "keywords": [
+    "sdk",
+    "fib",
+    "payment",
+    "integration"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Gateway ICT",
+      "email": "info@the-gw.com",
+      "homepage": "https://the-gw.com/"
     }
+  ],
+  "minimum-stability": "dev",
+  "require": {
+    "php": "^7.4|^8.0",
+    "ext-json": "*",
+    "guzzlehttp/guzzle": "^6.3|^7.0",
+    "illuminate/contracts": "^7.0|^8.0",
+    "illuminate/http": "^7.0|^8.0",
+    "illuminate/support": "^7.0|^8.0"
+  },
+  "require-dev": {
+    "mockery/mockery": "^1.4",
+    "orchestra/testbench": "^6.0",
+    "phpunit/phpunit": "^8.5|^9.5",
+    "laravel/legacy-factories": "^1.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "FirstIraqiBank\\FIBPaymentSDK\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "FirstIraqiBank\\FIBPaymentSDK\\Tests\\": "tests/"
+    }
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "scripts": {
+    "test": "phpunit"
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "FirstIraqiBank\\FIBPaymentSDK\\FIBPaymentServiceProvider"
+      ]
+    }
+  }
 }
