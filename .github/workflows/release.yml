@@ -17,7 +17,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: main  # Ensure we start from the main branch
+          ref: workflow  # Ensure we start from the main branch
 
       - name: Configure Git
         run: |
