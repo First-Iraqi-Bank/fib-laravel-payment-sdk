@@ -3,7 +3,8 @@ name: CI - Unit Tests
 on:
   push:
     branches:
-      - main
+      - '**'
+
     paths-ignore:
       - README.md
       - .github/CODEOWNERS
@@ -14,7 +15,6 @@ on:
   pull_request:
     branches:
       - main
-      - dev
 
 
 jobs:
