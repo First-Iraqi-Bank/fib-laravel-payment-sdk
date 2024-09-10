@@ -80,9 +80,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           ref: main  # Ensure we start from the main branch
+          token: "{{ secrets.FIB_PAT }}"
 
       - name: Configure Git
         run: |
@@ -133,6 +135,8 @@ jobs:
 
       - name: Push changes and create tag
         run: |
+          git config --global user.email "${{ vars.FIB_BOT_MAIL }}"
+          git config --global user.name "${{ vars.FIB_BOT }}"
           git push origin main
           git tag -a "v${{ env.NEW_VERSION }}" -m "Release ${{ env.NEW_VERSION }}"
           git push origin "v${{ env.NEW_VERSION }}"
