@@ -22,10 +22,10 @@ jobs:
         with:
           ref: main  # Ensure we start from the main branch
 
-      - name: Configure Git
-        run: |
-          git config --global user.name "${{ vars.FIB_BOT }}"
-          git config --global user.password "${{ vars.FIB_PAT }}"
+#      - name: Configure Git
+#        run: |
+#          git config --global user.name "${{ vars.FIB_BOT }}"
+#          git config --global user.password "${{ vars.FIB_PAT }}"
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
@@ -61,6 +61,9 @@ jobs:
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
 
       - name: Update composer.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.FIB_PAT }}
+
         run: |
           jq --arg version "$NEW_VERSION" '.version = $version' composer.json > tmp.json && mv tmp.json composer.json
           git add composer.json
