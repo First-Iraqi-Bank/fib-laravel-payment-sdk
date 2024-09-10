@@ -87,8 +87,9 @@ jobs:
 
       - name: Configure Git
         run: |
-          git config --global user.email "${{ vars.FIB_BOT_MAIL }}"
-          git config --global user.name "${{ vars.FIB_BOT }}"
+          # git config --global user.email "${{ vars.FIB_BOT_MAIL }}"
+          # git config --global user.name "${{ vars.FIB_BOT }}"
+          git config --list
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
@@ -134,8 +135,8 @@ jobs:
 
       - name: Push changes and create tag
         run: |
-          git config --global user.email "${{ vars.FIB_BOT_MAIL }}"
-          git config --global user.name "${{ vars.FIB_BOT }}"
+          # git config --global user.email "${{ vars.FIB_BOT_MAIL }}"
+          # git config --global user.name "${{ vars.FIB_BOT }}"
           git push origin main
           git tag -a "v${{ env.NEW_VERSION }}" -m "Release ${{ env.NEW_VERSION }}"
           git push origin "v${{ env.NEW_VERSION }}"
