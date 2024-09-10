@@ -82,7 +82,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: workflow  # Ensure we start from the main branch
+          ref: main  # Ensure we start from the main branch
 
       - name: Configure Git
         run: |
@@ -133,6 +133,6 @@ jobs:
 
       - name: Push changes and create tag
         run: |
-          git push origin workflow
+          git push origin main
           git tag -a "v${{ env.NEW_VERSION }}" -m "Release ${{ env.NEW_VERSION }}"
           git push origin "v${{ env.NEW_VERSION }}"
