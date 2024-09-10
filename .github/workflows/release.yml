@@ -20,7 +20,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: main  # Ensure we start from the main branch
+          ref: workflow  # Ensure we start from the main branch
 
       - name: Configure Git
         run: |
@@ -66,14 +66,9 @@ jobs:
           git add composer.json
           git branch
           git commit -m "Bump version to ${{ env.NEW_VERSION }}"
-          git commit --amend --author "${{ vars.FIB_BOT }} ${{ vars.FIB_BOT_EMAIL }}"
+
+      - name: Push changes and create tag
+        run: |
           git push --force
-
-
-#      - name: Push changes and create tag
-#        run: |
-#          git config --list
-#
-#
-#          git tag -a "v${{ env.NEW_VERSION }}" -m "Release ${{ env.NEW_VERSION }}"
-#          git push origin "v${{ env.NEW_VERSION }}"
+          git tag -a "v${{ env.NEW_VERSION }}" -m "Release ${{ env.NEW_VERSION }}"
+          git push origin "v${{ env.NEW_VERSION }}"
