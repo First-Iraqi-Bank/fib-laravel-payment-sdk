@@ -87,9 +87,9 @@ jobs:
 
       - name: Configure Git
         run: |
-          # git config --global user.email "${{ vars.FIB_BOT_MAIL }}"
-          # git config --global user.name "${{ vars.FIB_BOT }}"
-          git config --list
+          git config --global user.email "shakhawan.k@the-gw.com"
+          git config --global user.name "shakhawanKamaran"
+
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
