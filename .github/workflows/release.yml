@@ -68,6 +68,8 @@ jobs:
 
       - name: Push changes and create tag
         run: |
+          git config user.name "${{ secrets.FIB_BOT }}"
+          git config user.password "${{ secrets.FIB_PAT }}"
           git push origin main
           git tag -a "v${{ env.NEW_VERSION }}" -m "Release ${{ env.NEW_VERSION }}"
           git push origin "v${{ env.NEW_VERSION }}"
