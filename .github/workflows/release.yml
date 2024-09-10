@@ -91,8 +91,6 @@ jobs:
           git config --global user.email "${{ vars.FIB_BOT_MAIL }}"
           git config --global user.name "${{ vars.FIB_BOT }}"
           git config --list
-
-
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -105,14 +103,11 @@ jobs:
         id: bump_version
         run: |
           CURRENT_VERSION=$(jq -r '.version' composer.json)
-
-
           VERSION_TYPE=patch
           IFS='.' read -r -a version_parts <<< "$CURRENT_VERSION"
           major=${version_parts[0]}
           minor=${version_parts[1]}
           patch=${version_parts[2]}
-
           if [[ "$VERSION_TYPE" == "patch" ]]; then
             patch=$((patch + 1))
           elif [[ "$VERSION_TYPE" == "minor" ]]; then
@@ -128,13 +123,11 @@ jobs:
           fi
           NEW_VERSION="$major.$minor.$patch"
           echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
-
       - name: Update composer.json
         run: |
           jq --arg version "$NEW_VERSION" '.version = $version' composer.json > tmp.json && mv tmp.json composer.json
           git add composer.json
           git commit -m "Bump version to ${{ env.NEW_VERSION }}"
-
       - name: Push changes and create tag
         run: |
           # git config --global user.email "${{ vars.FIB_BOT_MAIL }}"
