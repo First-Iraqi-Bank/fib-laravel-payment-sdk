@@ -90,6 +90,7 @@ jobs:
         run: |
           git config --global user.email "${{ vars.FIB_BOT_MAIL }}"
           git config --global user.name "${{ vars.FIB_BOT }}"
+          git config --global http.https://github.com/.extraheader=AUTHORIZATION: "basic ${{ secrets.FIB_PAT }}"
           git config --list
 
 
