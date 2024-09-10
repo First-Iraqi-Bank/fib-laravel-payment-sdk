@@ -22,10 +22,11 @@ jobs:
         with:
           ref: main  # Ensure we start from the main branch
 
-#      - name: Configure Git
-#        run: |
-#          git config --global user.email "${{ vars.FIB_BOT_MAIL }}"
-#          git config --global user.name "${{ vars.FIB_BOT }}"
+      - name: Configure Git
+        run: |
+          git config --global user.email "${{ vars.FIB_BOT_MAIL }}"
+          git config --global user.name "${{ vars.FIB_BOT }}"
+          git config --global user.password "${{ vars.FIB_PAT }}"
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
