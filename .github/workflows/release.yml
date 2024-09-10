@@ -83,12 +83,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.FIB_PAT }}
           ref: main  # Ensure we start from the main branch
 
       - name: Configure Git
         run: |
-          git config --global user.email "shakhawan.k@the-gw.com"
-          git config --global user.name "shakhawanKamaran"
+          # git config --global user.email "shakhawan.k@the-gw.com"
+          # git config --global user.name "shakhawanKamaran"
+          git config --list
 
 
       - name: Set up PHP
