@@ -75,5 +75,6 @@ jobs:
           git config --list
 
           git push origin main --force
+
 #          git tag -a "v${{ env.NEW_VERSION }}" -m "Release ${{ env.NEW_VERSION }}"
 #          git push origin "v${{ env.NEW_VERSION }}"
