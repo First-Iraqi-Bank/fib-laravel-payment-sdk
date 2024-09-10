@@ -13,6 +13,68 @@ on:
           - minor
           - major
 
+#jobs:
+#  release:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v3
+#        with:
+#          ref: workflow  # Ensure we start from the main branch
+#
+#      - name: Configure Git
+#        run: |
+#          git config --global user.name "${{ vars.FIB_BOT }}"
+#          git config --global user.email "${{ vars.FIB_BOT_EMAIL }}"
+#
+#      - name: Set up PHP
+#        uses: shivammathur/setup-php@v2
+#        with:
+#          php-version: "8.0"
+#
+#      - name: Install dependencies
+#        run: composer install --no-progress --no-suggest --prefer-dist
+#
+#      - name: Bump version
+#        id: bump_version
+#        run: |
+#          CURRENT_VERSION=$(jq -r '.version' composer.json)
+#          VERSION_TYPE=${{ github.event.inputs.version_type }}
+#          IFS='.' read -r -a version_parts <<< "$CURRENT_VERSION"
+#          major=${version_parts[0]}
+#          minor=${version_parts[1]}
+#          patch=${version_parts[2]}
+#          if [[ "$VERSION_TYPE" == "patch" ]]; then
+#            patch=$((patch + 1))
+#          elif [[ "$VERSION_TYPE" == "minor" ]]; then
+#            minor=$((minor + 1))
+#            patch=0
+#          elif [[ "$VERSION_TYPE" == "major" ]]; then
+#            major=$((major + 1))
+#            minor=0
+#            patch=0
+#          else
+#            echo "Unsupported version type specified."
+#            exit 1
+#          fi
+#          NEW_VERSION="$major.$minor.$patch"
+#          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+#
+#      - name: Update composer.json
+#        run: |
+#          jq --arg version "$NEW_VERSION" '.version = $version' composer.json > tmp.json && mv tmp.json composer.json
+#          git add composer.json
+#          git branch
+#          git commit -m "Bump version to ${{ env.NEW_VERSION }}"
+#
+#      - name: Push changes and create tag
+#        run: |
+#          git push --force
+#          git tag -a "v${{ env.NEW_VERSION }}" -m "Release ${{ env.NEW_VERSION }}"
+#          git push origin "v${{ env.NEW_VERSION }}"
+
+
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -24,8 +86,8 @@ jobs:
 
       - name: Configure Git
         run: |
+          git config --global user.email "${{ vars.FIB_BOT_MAIL }}"
           git config --global user.name "${{ vars.FIB_BOT }}"
-          git config --global user.email "${{ vars.FIB_BOT_EMAIL }}"
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
@@ -39,11 +101,14 @@ jobs:
         id: bump_version
         run: |
           CURRENT_VERSION=$(jq -r '.version' composer.json)
-          VERSION_TYPE=${{ github.event.inputs.version_type }}
+
+
+          VERSION_TYPE=patch
           IFS='.' read -r -a version_parts <<< "$CURRENT_VERSION"
           major=${version_parts[0]}
           minor=${version_parts[1]}
           patch=${version_parts[2]}
+
           if [[ "$VERSION_TYPE" == "patch" ]]; then
             patch=$((patch + 1))
           elif [[ "$VERSION_TYPE" == "minor" ]]; then
@@ -64,11 +129,10 @@ jobs:
         run: |
           jq --arg version "$NEW_VERSION" '.version = $version' composer.json > tmp.json && mv tmp.json composer.json
           git add composer.json
-          git branch
           git commit -m "Bump version to ${{ env.NEW_VERSION }}"
 
       - name: Push changes and create tag
         run: |
-          git push --force
+          git push origin workflow
           git tag -a "v${{ env.NEW_VERSION }}" -m "Release ${{ env.NEW_VERSION }}"
           git push origin "v${{ env.NEW_VERSION }}"
