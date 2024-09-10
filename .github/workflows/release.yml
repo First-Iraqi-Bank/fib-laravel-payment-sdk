@@ -24,10 +24,8 @@ jobs:
 
       - name: Configure Git
         run: |
-          git config --global user.email "mja.ise.1981@gmail.com"
-          git config --global user.name "MJAISE"
-#          git config --global user.name "${{ vars.FIB_BOT }}"
-#          git config --global user.password "${{ vars.FIB_PAT }}"
+          git config --global user.name "${{ vars.FIB_BOT }}"
+          git config --global user.password "${{ vars.FIB_PAT }}"
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
