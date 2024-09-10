@@ -72,6 +72,8 @@ jobs:
           git config user.name "${{ secrets.FIB_BOT }}"
           git config user.password "${{ secrets.FIB_PAT }}"
 
-          git push origin main --force
-          git tag -a "v${{ env.NEW_VERSION }}" -m "Release ${{ env.NEW_VERSION }}"
-          git push origin "v${{ env.NEW_VERSION }}"
+          git config --list
+
+#          git push origin main --force
+#          git tag -a "v${{ env.NEW_VERSION }}" -m "Release ${{ env.NEW_VERSION }}"
+#          git push origin "v${{ env.NEW_VERSION }}"
