@@ -89,7 +89,7 @@ jobs:
       - name: Configure Git
         run: |
           git config --global user.email "${{ vars.FIB_BOT_MAIL }}"
-          git config --global user.name "First Iraqi Bank"
+          git config --global user.name "${{ vars.FIB_BOT }}"
           git config --list
 
 
