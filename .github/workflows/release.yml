@@ -84,7 +84,6 @@ jobs:
         with:
           fetch-depth: 0
           ref: main  # Ensure we start from the main branch
-          token: "{{ secrets.FIB_PAT }}"
 
       - name: Configure Git
         run: |
