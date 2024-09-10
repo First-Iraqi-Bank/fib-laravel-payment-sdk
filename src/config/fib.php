@@ -9,7 +9,6 @@
         'callback' => env('FIB_CALLBACK_URL'),
         'auth_account' => env('FIB_ACCOUNT', 'default'),
 
-        // Default account credentials
         'default' => [
             'client_id' => env('FIB_CLIENT_ID'),
             'secret' => env('FIB_CLIENT_SECRET'),
