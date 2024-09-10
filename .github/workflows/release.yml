@@ -1,3 +1,86 @@
+#name: Release
+#
+#on:
+#  workflow_dispatch:
+#    inputs:
+#      version_type:
+#        description: "New version type"
+#        required: true
+#        default: "patch"
+#        type: choice
+#        options:
+#          - patch
+#          - minor
+#          - major
+#
+#jobs:
+#  release:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v3
+#        with:
+#          ref: main  # Ensure we start from the main branch
+#
+#      - name: Configure Git
+#        run: |
+#          git config --global user.name "${{ vars.FIB_BOT }}"
+#          git config --global user.password "${{ vars.FIB_PAT }}"
+#
+#      - name: Set up PHP
+#        uses: shivammathur/setup-php@v2
+#        with:
+#          php-version: "8.0"
+#
+#      - name: Install dependencies
+#        run: composer install --no-progress --no-suggest --prefer-dist
+#
+#      - name: Bump version
+#        id: bump_version
+#        run: |
+#          CURRENT_VERSION=$(jq -r '.version' composer.json)
+#          VERSION_TYPE=${{ github.event.inputs.version_type }}
+#          IFS='.' read -r -a version_parts <<< "$CURRENT_VERSION"
+#          major=${version_parts[0]}
+#          minor=${version_parts[1]}
+#          patch=${version_parts[2]}
+#          if [[ "$VERSION_TYPE" == "patch" ]]; then
+#            patch=$((patch + 1))
+#          elif [[ "$VERSION_TYPE" == "minor" ]]; then
+#            minor=$((minor + 1))
+#            patch=0
+#          elif [[ "$VERSION_TYPE" == "major" ]]; then
+#            major=$((major + 1))
+#            minor=0
+#            patch=0
+#          else
+#            echo "Unsupported version type specified."
+#            exit 1
+#          fi
+#          NEW_VERSION="$major.$minor.$patch"
+#          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+#
+#      - name: Update composer.json
+#        run: |
+#          jq --arg version "$NEW_VERSION" '.version = $version' composer.json > tmp.json && mv tmp.json composer.json
+#          git add composer.json
+#          git branch
+#          git commit --amend --reset-author
+#
+#          git commit -m "Bump version to ${{ env.NEW_VERSION }}"
+#          git push --force
+#
+#
+##      - name: Push changes and create tag
+##        run: |
+##          git config --list
+##
+##
+##          git tag -a "v${{ env.NEW_VERSION }}" -m "Release ${{ env.NEW_VERSION }}"
+##          git push origin "v${{ env.NEW_VERSION }}"
+
+
+
 name: Release
 
 on:
@@ -19,14 +102,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        with:
-          ref: main  # Ensure we start from the main branch
 
-      - name: Configure Git
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh -y
+
+      - name: Authenticate GitHub CLI
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+
+      - name: Set Git config
         run: |
           git config --global user.name "${{ vars.FIB_BOT }}"
-          git config --global user.password "${{ vars.FIB_PAT }}"
-          git commit --amend --reset-author
+          git config --global user.email "fib-bot@example.com"
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
@@ -65,15 +151,19 @@ jobs:
         run: |
           jq --arg version "$NEW_VERSION" '.version = $version' composer.json > tmp.json && mv tmp.json composer.json
           git add composer.json
-          git branch
           git commit -m "Bump version to ${{ env.NEW_VERSION }}"
-          git push --force
 
+      - name: Create release branch and push changes
+        run: |
+          RELEASE_BRANCH="release-v${{ env.NEW_VERSION }}"
+          git checkout -b "$RELEASE_BRANCH"
+          git push origin "$RELEASE_BRANCH"
 
-#      - name: Push changes and create tag
-#        run: |
-#          git config --list
-#
-#
-#          git tag -a "v${{ env.NEW_VERSION }}" -m "Release ${{ env.NEW_VERSION }}"
-#          git push origin "v${{ env.NEW_VERSION }}"
+      - name: Create pull request using GitHub CLI
+        run: |
+          gh pr create --title "Release ${{ env.NEW_VERSION }}" --body "Automated release for version ${{ env.NEW_VERSION }}" --base main --head "$RELEASE_BRANCH"
+
+      - name: Enable auto-merge for the PR
+        run: |
+          PR_NUMBER=$(gh pr list --state open --head "$RELEASE_BRANCH" --json number --jq '.[0].number')
+          gh pr merge $PR_NUMBER --squash --auto
