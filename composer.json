@@ -1,7 +1,7 @@
 {
   "name": "first-iraqi-bank/fib-payment-sdk",
   "description": "SDK for integrating with the FIB payment system, enabling user authentication and payment transactions.",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "type": "library",
   "keywords": [
     "sdk",
