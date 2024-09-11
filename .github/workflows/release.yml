@@ -103,7 +103,7 @@ jobs:
         id: bump_version
         run: |
           CURRENT_VERSION=$(jq -r '.version' composer.json)
-          VERSION_TYPE=${{ github.event.inputs.version_type }}
+          VERSION_TYPE=patch
           IFS='.' read -r -a version_parts <<< "$CURRENT_VERSION"
           major=${version_parts[0]}
           minor=${version_parts[1]}
