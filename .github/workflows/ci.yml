@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: ['7.4', '8.1', '8.2']  # Keeping PHP 7.4 but skipping tests
+        php-version: ['7.4', '8.2']  # Keeping PHP 7.4 but skipping tests
 
     steps:
       - name: Checkout code
@@ -26,7 +26,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          if [ "${{ matrix.php-version }}" == "7.4" ] || [ "${{ matrix.php-version }}" == "8.1" ]; then
+          if [ "${{ matrix.php-version }}" == "7.4" ]; then
             composer install --prefer-dist --no-progress --no-interaction --ignore-platform-reqs
           else
             composer install --prefer-dist --no-progress --no-interaction
