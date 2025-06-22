@@ -5,15 +5,15 @@ The FIB Laravel Payment SDK provides a seamless integration with the FIB payment
 **Table of Contents**
 - [Features](#features)
 - [Installation](#installation)
-    - [Composer Installation](#composer-installation)
-    - [Alternative Installation (Without Composer)](#alternative-installation-without-composer)
+  - [Composer Installation](#composer-installation)
+  - [Alternative Installation (Without Composer)](#alternative-installation-without-composer)
 - [Registering the Service Provider and Running Migrations](#Registering-the-Service-Provider-and-Running-Migrations)
 - [Usage](#usage)
-    - [Creating a Payment](#creating-a-payment)
-    - [Checking Payment Status](#checking-payment-status)
-    - [Refunding a Payment](#refunding-a-payment)
-    - [Cancelling a Payment](#cancelling-a-payment)
-    - [Handling Payment Callbacks](#handling-payment-callbacks)
+  - [Creating a Payment](#creating-a-payment)
+  - [Checking Payment Status](#checking-payment-status)
+  - [Refunding a Payment](#refunding-a-payment)
+  - [Cancelling a Payment](#cancelling-a-payment)
+  - [Handling Payment Callbacks](#handling-payment-callbacks)
 - [FIB Payment Documentation](#fib-payment-documentation)
 - [Testing](#testing)
 - [Contributing](#contributing)
@@ -124,7 +124,7 @@ Add the following environment variables to your `.env` file:
 - `FIB_REFUNDABLE_FOR`: The period for which transactions can be refunded (default: P7D).
 - `FIB_CURRENCY`: The currency used for transactions (default: IQD).
 - `FIB_CALLBACK_URL`: The callback URL for payment notifications.
-- `FIB_ACCOUNT`: The FIB payment account identifier.
+- `FIB_DEFAULT_ACCOUNT`: The FIB default payment account identifier.
 
 ### Usage of the SDK
 
@@ -149,13 +149,18 @@ use FirstIraqiBank\FIBPaymentSDK\Services\FIBPaymentIntegrationService;
 
 protected $paymentService;
 
-// Inject the FIBPaymentIntegrationService in your controller's construct.
-public function __construct(FIBPaymentIntegrationService $paymentService)
+// Inject the FIBPaymentIntegrationService in your controller's construct and FIBAuthIntegrationService for using multi account funtionality.
+public function __construct(FIBPaymentIntegrationService $paymentService, FIBAuthIntegrationService $fibAuthIntegrationService)
 {
     $this->paymentService = $paymentService;
+    $this->fibAuthIntegrationService = $fibAuthIntegrationService;
 }
 
 try {
+    
+    //call the setAccount method of the FIBAuthIntegrationService for using another account rather than default one
+    $this->fibAuthIntegrationService->setAccount('second_account');
+     
     // Call the createPayment method of the FIBPaymentIntegrationService
     $response = $this->paymentService->createPayment(1000, 'http://localhost/callback', 'Your payment description', 'http://localhost/redirectUri');
 
@@ -187,14 +192,18 @@ use FirstIraqiBank\FIBPaymentSDK\Services\FIBPaymentIntegrationService;
 
 protected $paymentService;
 
-// Inject the FIBPaymentIntegrationService in your controller's construct.
-public function __construct(FIBPaymentIntegrationService $paymentService)
+// Inject the FIBPaymentIntegrationService in your controller's construct and FIBAuthIntegrationService for using multi account funtionality.
+public function __construct(FIBPaymentIntegrationService $paymentService, FIBAuthIntegrationService $fibAuthIntegrationService)
 {
     $this->paymentService = $paymentService;
+    $this->fibAuthIntegrationService = $fibAuthIntegrationService;
 }
 
 try {
     $paymentId = 'your_payment_id'; // Retrieve from your storage
+    
+    //call the setAccount method of the FIBAuthIntegrationService for using another account rather than default one
+    $this->fibAuthIntegrationService->setAccount('second_account');
 
     // Call the checkPaymentStatus method of the FIBPaymentIntegrationService
     $response = $this->paymentService->checkPaymentStatus($paymentId);
@@ -230,14 +239,19 @@ use FirstIraqiBank\FIBPaymentSDK\Services\FIBPaymentIntegrationService;
 
 protected $paymentService;
 
-// Inject the FIBPaymentIntegrationService in your controller's construct.
-public function __construct(FIBPaymentIntegrationService $paymentService)
+// Inject the FIBPaymentIntegrationService in your controller's construct and FIBAuthIntegrationService for using multi account funtionality.
+public function __construct(FIBPaymentIntegrationService $paymentService, FIBAuthIntegrationService $fibAuthIntegrationService)
 {
     $this->paymentService = $paymentService;
+    $this->fibAuthIntegrationService = $fibAuthIntegrationService;
 }
 
 try {
     $paymentId = 'your_payment_id'; // Retrieve from your storage
+    
+    //call the setAccount method of the FIBAuthIntegrationService for using another account rather than default one
+    $this->fibAuthIntegrationService->setAccount('second_account');
+     
     $response = $this->paymentService->refund($paymentId);
     echo "Refund Payment Status: " . $response;
 } catch (Exception $e) {
@@ -256,15 +270,19 @@ use FirstIraqiBank\FIBPaymentSDK\Services\FIBPaymentIntegrationService;
 
 protected $paymentService;
 
-// Inject the FIBPaymentIntegrationService in your controller's construct.
-public function __construct(FIBPaymentIntegrationService $paymentService)
+// Inject the FIBPaymentIntegrationService in your controller's construct and FIBAuthIntegrationService for using multi account funtionality.
+public function __construct(FIBPaymentIntegrationService $paymentService, FIBAuthIntegrationService $fibAuthIntegrationService)
 {
     $this->paymentService = $paymentService;
+    $this->fibAuthIntegrationService = $fibAuthIntegrationService;
 }
 
 try {
     $paymentId = 'your_payment_id'; // Retrieve from your storage
 
+    //call the setAccount method of the FIBAuthIntegrationService for using another account rather than default one
+    $this->fibAuthIntegrationService->setAccount('second_account');
+     
     // Call the cancelPayment method of the FIBPaymentIntegrationService
     $response = $this->paymentService->cancelPayment($paymentId);
 
