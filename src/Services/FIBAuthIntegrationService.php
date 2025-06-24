@@ -16,7 +16,15 @@ class FIBAuthIntegrationService
      */
     public function __construct()
     {
-        $this->account = config('fib.auth_account', 'default');
+        $this->account = config('fib.default_auth_account');
+    }
+
+    /**
+     * Set the account.
+     */
+    public function setAccount($account)
+    {
+        $this->account = $account;
     }
 
     /**
@@ -35,7 +43,7 @@ class FIBAuthIntegrationService
                         'verify' => false, // Disable SSL verification
                     ])
                         ->asForm()
-                        ->withBasicAuth(config("fib.{$this->account}.client_id"), config("fib.{$this->account}.secret"))
+                        ->withBasicAuth(config("fib.auth_accounts.{$this->account}.client_id"), config("fib.auth_accounts.{$this->account}.secret"))
                         ->post(config('fib.login'), [
                             'grant_type' => config('fib.grant'),
                         ]);
