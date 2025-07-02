@@ -162,7 +162,7 @@ try {
     $this->fibAuthIntegrationService->setAccount('second_account');
      
     // Call the createPayment method of the FIBPaymentIntegrationService
-    $response = $this->paymentService->createPayment(1000, 'http://localhost/callback', 'Your payment description', 'http://localhost/redirectUri');
+    $response = $this->paymentService->createPayment(1000, 'http://localhost/callback', 'Your payment description', 'http://localhost/redirectUri', 'extraData');
 
     $paymentData = json_decode($response->getBody(), true);
 

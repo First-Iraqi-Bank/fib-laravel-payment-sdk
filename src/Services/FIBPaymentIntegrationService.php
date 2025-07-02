@@ -59,21 +59,23 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
     /**
      * @throws Exception
      */
-    public function createPayment($amount, $callback = null, $description = null, $redirectUri = null)
+    public function createPayment($amount, $callback = null, $description = null, $redirectUri = null, $extraData = null)
     {
         try{
-            $data = $this->getPaymentData($amount, $callback, $description, $redirectUri);
+            $data = $this->getPaymentData($amount, $callback, $description, $redirectUri, $extraData);
             $paymentData = $this->postRequest("{$this->baseUrl}/payments", $data);
             if($paymentData->successful()) {
                 $this->fibPaymentRepository->createPayment($paymentData->json(), $amount);
             }
-    
+
             return $paymentData;
         }catch(Exception $e){
             Log::error('Failed to create payment', [
                 'amount' => $amount,
                 'callback' => $callback,
                 'description' => $description,
+                'redirect_uri' => $redirectUri,
+                'extra_data' => $extraData,
                 'exception_message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
@@ -100,7 +102,7 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
             ]);
             throw new Exception(
                 "An error occurred while checking the payment status. Please try again later.",
-            );        
+            );
         }
     }
 
@@ -109,7 +111,7 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
         $this->fibPaymentRepository->updatePaymentStatus($paymentId, $status);
     }
 
-    public function getPaymentData($amount, $callback = null, $description = null, $redirectUri = null)
+    public function getPaymentData($amount, $callback = null, $description = null, $redirectUri = null, $extraData = null)
     {
         return [
             'monetaryValue' => [
@@ -120,6 +122,7 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
             'description' => $description ?? '',
             'redirectUri' => $redirectUri ?? '',
             'refundableFor' => config('fib.refundable_for'),
+            ...$extraData ? ['extraData' => $extraData] : [],
         ];
     }
 
