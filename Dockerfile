@@ -1,4 +1,4 @@
-# Use the PHP 8.1 FPM image as the base
+# Use the PHP 8.2 FPM image as the base
 FROM php:8.2-fpm
 
 # Install system dependencies
