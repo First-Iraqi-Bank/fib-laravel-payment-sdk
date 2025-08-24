@@ -2,11 +2,14 @@
 
 namespace FirstIraqiBank\FIBPaymentSDK\Model;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class FibPayment extends Model
 {
+    use HasFactory;
+
     const PENDING = 'PENDING';
 
     const UNPAID = 'UNPAID';
