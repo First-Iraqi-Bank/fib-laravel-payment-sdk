@@ -31,7 +31,7 @@ class FIBAuthIntegrationServiceTest extends TestCase
         ]);
 
         // Act
-        $service = new FIBAuthIntegrationService();
+        $service = new FIBAuthIntegrationService;
         $token = $service->getToken();
 
         // Assert
@@ -49,29 +49,29 @@ class FIBAuthIntegrationServiceTest extends TestCase
         $this->expectExceptionMessage('Failed to retrieve access token.');
 
         // Act
-        $service = new FIBAuthIntegrationService();
+        $service = new FIBAuthIntegrationService;
         $service->getToken();
     }
 
-//        public function test_it_logs_and_throws_exception_on_error()
-//        {
-//            // Arrange
-//            Http::fake(function ($request) {
-//                throw new Exception('Network Error');
-//            });
-//
-//
-//            $this->expectException(Exception::class);
-//            $this->expectExceptionMessage('Network Error');
-//
-//            // Act
-//            $service = new FIBAuthIntegrationService();
-//            $service->getToken();
-//        }
+    //        public function test_it_logs_and_throws_exception_on_error()
+    //        {
+    //            // Arrange
+    //            Http::fake(function ($request) {
+    //                throw new Exception('Network Error');
+    //            });
+    //
+    //
+    //            $this->expectException(Exception::class);
+    //            $this->expectExceptionMessage('Network Error');
+    //
+    //            // Act
+    //            $service = new FIBAuthIntegrationService();
+    //            $service->getToken();
+    //        }
 
     public function test_it_sets_the_account()
     {
-        $service = new FIBAuthIntegrationService();
+        $service = new FIBAuthIntegrationService;
 
         // Use reflection to access the protected $account property
         $reflection = new \ReflectionClass($service);
