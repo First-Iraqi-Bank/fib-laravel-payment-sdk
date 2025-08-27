@@ -1,6 +1,5 @@
 services:
     php:
-        image: php:8.2-fpm
         container_name: php-app
         working_dir: /var/www/html
         volumes:
