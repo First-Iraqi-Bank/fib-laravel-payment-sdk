@@ -15,7 +15,7 @@ class FIBPaymentRepositoryService implements FIBPaymentRepositoryInterface
     /**
      * Create a new payment record.
      */
-    public function createPayment(array $paymentData, int $amount): Model|Builder
+    public function createPayment(array $paymentData, int $amount)
     {
         return FibPayment::query()->create([
             'fib_payment_id' => $paymentData['paymentId'],
