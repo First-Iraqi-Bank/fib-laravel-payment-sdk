@@ -155,7 +155,7 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
     {
         try {
             $response = $this->postRequest("{$this->baseUrl}/payments/{$paymentId}/cancel", data: []);
-            if ($response->noContent()) {
+            if ($response->status() == 204) {
                 $this->fibPaymentRepository->updatePaymentStatus($paymentId, FibPayment::CANCELED);
             }
 
