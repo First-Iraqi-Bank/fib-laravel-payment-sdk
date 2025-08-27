@@ -7,9 +7,11 @@ use FirstIraqiBank\FIBPaymentSDK\Model\FibPayment;
 use FirstIraqiBank\FIBPaymentSDK\Model\FibRefund;
 use FirstIraqiBank\FIBPaymentSDK\Services\Contracts\FIBPaymentIntegrationServiceInterface;
 use GuzzleHttp\Promise\PromiseInterface;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterface
 {
@@ -26,36 +28,29 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
         $this->baseUrl = config('fib.base_url');
     }
 
-    /**
-     * @throws Exception
-     */
-    private function postRequest($url, array $data): PromiseInterface|Response
+    private function postRequest(string $url, array $data): Response
     {
         $token = $this->fibAuthIntegrationService->getToken();
 
-        return Http::asJson()
-            ->withoutVerifying()
-            ->withToken($token)
-            ->retry(times: 3, sleepMilliseconds: 100, throw: false)
-            ->post($url, $data);
+        return retry(3, function () use ($url, $data, $token) {
+            return Http::asJson()
+                ->withoutVerifying()
+                ->withToken($token)
+                ->post($url, $data);
+        }, 100);
     }
 
-    /**
-     * @throws Exception
-     */
-    protected function getRequest($url): PromiseInterface|Response
+    protected function getRequest($url): Response
     {
         $token = $this->fibAuthIntegrationService->getToken();
 
-        return Http::withoutVerifying()
-            ->withToken($token)
-            ->retry(times: 3, sleepMilliseconds: 100, throw: false)
-            ->get($url);
+        return retry(3, function () use ($url, $token) {
+            return Http::withoutVerifying()
+                ->withToken($token)
+                ->get($url);
+        }, 100);
     }
 
-    /**
-     * @throws Exception
-     */
     public function createPayment($amount, $callback = null, $description = null, $redirectUri = null, $extraData = null): PromiseInterface|Response|null
     {
         try {
@@ -84,9 +79,6 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
         return null;
     }
 
-    /**
-     * @throws Exception
-     */
     public function checkPaymentStatus($paymentId): Response|PromiseInterface|null
     {
         try {
@@ -131,9 +123,6 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
         ];
     }
 
-    /**
-     * @throws Exception
-     */
     public function refund($paymentId): void
     {
         try {
