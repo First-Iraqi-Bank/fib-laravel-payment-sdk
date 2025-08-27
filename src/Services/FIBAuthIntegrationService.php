@@ -55,6 +55,8 @@ class FIBAuthIntegrationService
         } catch (Exception $e) {
 
             Log::error('Fib Payment SDK: Exception while getting token', ['exception' => $e]);
+
+            throw $e;
         }
 
         return null;

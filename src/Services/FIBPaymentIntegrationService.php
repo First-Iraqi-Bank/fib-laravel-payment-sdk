@@ -7,11 +7,9 @@ use FirstIraqiBank\FIBPaymentSDK\Model\FibPayment;
 use FirstIraqiBank\FIBPaymentSDK\Model\FibRefund;
 use FirstIraqiBank\FIBPaymentSDK\Services\Contracts\FIBPaymentIntegrationServiceInterface;
 use GuzzleHttp\Promise\PromiseInterface;
-use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Throwable;
 
 class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterface
 {
