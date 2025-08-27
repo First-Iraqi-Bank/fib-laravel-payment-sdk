@@ -2,9 +2,9 @@
 
 namespace FirstIraqiBank\FIBPaymentSDK\Services;
 
+use Exception;
 use FirstIraqiBank\FIBPaymentSDK\Model\FibPayment;
 use FirstIraqiBank\FIBPaymentSDK\Services\Contracts\FIBPaymentRepositoryInterface;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -55,6 +55,8 @@ class FIBPaymentRepositoryService implements FIBPaymentRepositoryInterface
 
     /**
      * Update the status of a payment.
+     *
+     * @throws Exception
      */
     public function updatePaymentStatus(string $paymentId, string $status): void
     {
@@ -62,6 +64,7 @@ class FIBPaymentRepositoryService implements FIBPaymentRepositoryInterface
             $this->getPaymentByFibId($paymentId)->update(['status' => $status]);
         } catch (ModelNotFoundException $e) {
             Log::error('Payment not found', ['paymentId' => $paymentId, 'exception' => $e]);
+            throw new Exception("Payment with ID {$paymentId} not found.");
         }
     }
 
