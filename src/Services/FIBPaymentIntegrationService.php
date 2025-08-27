@@ -49,6 +49,9 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
         }, 100);
     }
 
+    /**
+     * @throws Exception
+     */
     public function createPayment($amount, $callback = null, $description = null, $redirectUri = null, $extraData = null): PromiseInterface|Response|null
     {
         try {
@@ -72,11 +75,13 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
                 'exception_message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+            throw $e;
         }
-
-        return null;
     }
 
+    /**
+     * @throws Exception
+     */
     public function checkPaymentStatus($paymentId): Response|PromiseInterface|null
     {
         try {
@@ -96,9 +101,8 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
                 'exception_message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+            throw $e;
         }
-
-        return null;
     }
 
     public function handleCallback($paymentId, $status): void
@@ -121,6 +125,9 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
         ];
     }
 
+    /**
+     * @throws Exception
+     */
     public function refund($paymentId): void
     {
         try {
@@ -146,9 +153,13 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
                 'exception_message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+            throw $e;
         }
     }
 
+    /**
+     * @throws Exception
+     */
     public function cancelPayment($paymentId): PromiseInterface|Response|null
     {
         try {
@@ -164,8 +175,7 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
                 'exception_message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+            throw $e;
         }
-
-        return null;
     }
 }
