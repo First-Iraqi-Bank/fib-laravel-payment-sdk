@@ -5,7 +5,6 @@ namespace FirstIraqiBank\FIBPaymentSDK\Services;
 use Exception;
 use FirstIraqiBank\FIBPaymentSDK\Model\FibPayment;
 use FirstIraqiBank\FIBPaymentSDK\Services\Contracts\FIBPaymentRepositoryInterface;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -15,10 +14,6 @@ class FIBPaymentRepositoryService implements FIBPaymentRepositoryInterface
 {
     /**
      * Create a new payment record.
-     *
-     * @param array $paymentData
-     * @param int $amount
-     * @return Builder|Model
      */
     public function createPayment(array $paymentData, int $amount)
     {
@@ -35,8 +30,6 @@ class FIBPaymentRepositoryService implements FIBPaymentRepositoryInterface
     /**
      * Retrieve a payment by its FIB payment ID.
      *
-     * @param string $paymentId
-     * @return Model
      * @throws ModelNotFoundException
      */
     public function getPaymentByFibId(string $paymentId): Model
@@ -46,9 +39,6 @@ class FIBPaymentRepositoryService implements FIBPaymentRepositoryInterface
 
     /**
      * Retrieve a payment by its ID.
-     *
-     * @param int $paymentId
-     * @return Model|null
      */
     public function getPaymentById(int $paymentId): ?Model
     {
@@ -57,9 +47,6 @@ class FIBPaymentRepositoryService implements FIBPaymentRepositoryInterface
 
     /**
      * Retrieve payments by their status.
-     *
-     * @param array $statuses
-     * @return Collection
      */
     public function getPaymentsByStatus(array $statuses): Collection
     {
@@ -69,9 +56,7 @@ class FIBPaymentRepositoryService implements FIBPaymentRepositoryInterface
     /**
      * Update the status of a payment.
      *
-     * @param string $paymentId
-     * @param string $status
-     * @return void
+     * @throws Exception
      */
     public function updatePaymentStatus(string $paymentId, string $status): void
     {
@@ -85,9 +70,6 @@ class FIBPaymentRepositoryService implements FIBPaymentRepositoryInterface
 
     /**
      * Retrieve the purchase associated with a payment.
-     *
-     * @param int $paymentId
-     * @return Model|null
      */
     public function getPurchase(int $paymentId): ?Model
     {
@@ -96,10 +78,6 @@ class FIBPaymentRepositoryService implements FIBPaymentRepositoryInterface
 
     /**
      * Update or create a refund record.
-     *
-     * @param string $paymentId
-     * @param array $refundData
-     * @return void
      */
     public function updateOrCreateRefund(string $paymentId, array $refundData): void
     {

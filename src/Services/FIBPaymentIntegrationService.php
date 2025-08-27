@@ -6,6 +6,8 @@ use Exception;
 use FirstIraqiBank\FIBPaymentSDK\Model\FibPayment;
 use FirstIraqiBank\FIBPaymentSDK\Model\FibRefund;
 use FirstIraqiBank\FIBPaymentSDK\Services\Contracts\FIBPaymentIntegrationServiceInterface;
+use GuzzleHttp\Promise\PromiseInterface;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -13,64 +15,58 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
 {
     protected $baseUrl;
 
-    // Declare properties
     protected $fibPaymentRepository;
+
     protected $fibAuthIntegrationService;
 
     public function __construct(FIBPaymentRepositoryService $fibPaymentRepository, FIBAuthIntegrationService $fibAuthIntegrationService)
     {
-        // Assign properties
         $this->fibPaymentRepository = $fibPaymentRepository;
         $this->fibAuthIntegrationService = $fibAuthIntegrationService;
         $this->baseUrl = config('fib.base_url');
     }
 
-    /**
-     * @throws Exception
-     */
-    private function postRequest($url, array $data)
+    private function postRequest(string $url, array $data): Response
     {
         $token = $this->fibAuthIntegrationService->getToken();
-        $response = retry(3, function () use ($url, $data, $token) {
-            return Http::withOptions([
-                'verify' => false, // Disable SSL verification
-            ])->asJson()
+
+        return retry(3, function () use ($url, $data, $token) {
+            return Http::asJson()
+                ->withoutVerifying()
                 ->withToken($token)
                 ->post($url, $data);
         }, 100);
-        return $response;
     }
 
-    /**
-     * @throws Exception
-     */
-    protected function getRequest($url)
+    protected function getRequest($url): Response
     {
         $token = $this->fibAuthIntegrationService->getToken();
-        $response = retry(3, function () use ($url, $token) {
-            return Http::withOptions([
-                'verify' => false, // Disable SSL verification
-            ])->withToken($token)
+
+        return retry(3, function () use ($url, $token) {
+            return Http::withoutVerifying()
+                ->withToken($token)
                 ->get($url);
         }, 100);
-        return $response;
     }
 
     /**
      * @throws Exception
      */
-    public function createPayment($amount, $callback = null, $description = null, $redirectUri = null, $extraData = null)
+    public function createPayment($amount, $callback = null, $description = null, $redirectUri = null, $extraData = null): PromiseInterface|Response|null
     {
-        try{
+        try {
             $data = $this->getPaymentData($amount, $callback, $description, $redirectUri, $extraData);
+
             $paymentData = $this->postRequest("{$this->baseUrl}/payments", $data);
-            if($paymentData->successful()) {
+
+            if ($paymentData->successful()) {
                 $this->fibPaymentRepository->createPayment($paymentData->json(), $amount);
             }
 
             return $paymentData;
-        }catch(Exception $e){
-            Log::error('Failed to create payment', [
+
+        } catch (Exception $e) {
+            Log::error('Fib Payment SDK: Failed while creating payment', [
                 'amount' => $amount,
                 'callback' => $callback,
                 'description' => $description,
@@ -79,39 +75,42 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
                 'exception_message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            throw new Exception("An error occurred while creating the payment. Please try again later.");
+            throw $e;
         }
     }
 
     /**
      * @throws Exception
      */
-    public function checkPaymentStatus($paymentId)
+    public function checkPaymentStatus($paymentId): Response|PromiseInterface|null
     {
-        try{
+        try {
+
             $response = $this->getRequest("{$this->baseUrl}/payments/{$paymentId}/status");
-            if($response->successful()) {
+
+            if ($response->successful()) {
+
                 $this->fibPaymentRepository->updatePaymentStatus($paymentId, $response->json()['status']);
             }
+
             return $response;
+
         } catch (Exception $e) {
-            Log::error('Failed to check payment status', [
+            Log::error('Fib Payment SDK: Failed while getting payment status', [
                 'payment_id' => $paymentId,
                 'exception_message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            throw new Exception(
-                "An error occurred while checking the payment status. Please try again later.",
-            );
+            throw $e;
         }
     }
 
-    public function handleCallback($paymentId, $status)
+    public function handleCallback($paymentId, $status): void
     {
         $this->fibPaymentRepository->updatePaymentStatus($paymentId, $status);
     }
 
-    public function getPaymentData($amount, $callback = null, $description = null, $redirectUri = null, $extraData = null)
+    public function getPaymentData($amount, $callback = null, $description = null, $redirectUri = null, $extraData = null): array
     {
         return [
             'monetaryValue' => [
@@ -129,26 +128,39 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
     /**
      * @throws Exception
      */
-    public function refund($paymentId)
+    public function refund($paymentId): void
     {
-        $response = $this->postRequest("{$this->baseUrl}/payments/{$paymentId}/refund", []);
-        if ($response->status() == 202) {
-            $refundData = [
-                'status' => FibRefund::SUCCESS,
-            ];
-            $this->fibPaymentRepository->updateOrCreateRefund($paymentId, $refundData);
-            $this->fibPaymentRepository->updatePaymentStatus($paymentId, FibPayment::REFUNDED);
-        } else {
-            $refundData = [
-                'fib_trace_id' => $response['traceId'],
-                'refund_failure_reason' => implode(', ', array_column($response['errors'], 'code')),
-                'status' => FibRefund::FAILED,
-            ];
-            $this->fibPaymentRepository->updateOrCreateRefund($paymentId, $refundData);
+        try {
+            $response = $this->postRequest("{$this->baseUrl}/payments/{$paymentId}/refund", []);
+
+            if ($response->status() == 202) {
+                $refundData = [
+                    'status' => FibRefund::SUCCESS,
+                ];
+                $this->fibPaymentRepository->updateOrCreateRefund($paymentId, $refundData);
+                $this->fibPaymentRepository->updatePaymentStatus($paymentId, FibPayment::REFUNDED);
+            } else {
+                $refundData = [
+                    'fib_trace_id' => $response['traceId'],
+                    'refund_failure_reason' => implode(', ', array_column($response['errors'], 'code')),
+                    'status' => FibRefund::FAILED,
+                ];
+                $this->fibPaymentRepository->updateOrCreateRefund($paymentId, $refundData);
+            }
+        } catch (Exception $e) {
+            Log::error('Fib Payment SDK: Failed while issuing refund', [
+                'payment_id' => $paymentId,
+                'exception_message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            throw $e;
         }
     }
 
-    public function cancelPayment($paymentId)
+    /**
+     * @throws Exception
+     */
+    public function cancelPayment($paymentId): PromiseInterface|Response|null
     {
         try {
             $response = $this->postRequest("{$this->baseUrl}/payments/{$paymentId}/cancel", data: []);
@@ -158,14 +170,12 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
 
             return $response;
         } catch (Exception $e) {
-            Log::error('Failed to cancel payment', [
+            Log::error('Fib Payment SDK: Failed while cancelling payment', [
                 'payment_id' => $paymentId,
                 'exception_message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            throw new Exception(
-                "An error occurred while attempting to cancel the payment. Please try again later.",
-            );
+            throw $e;
         }
     }
 }

@@ -31,47 +31,45 @@ class FIBAuthIntegrationServiceTest extends TestCase
         ]);
 
         // Act
-        $service = new FIBAuthIntegrationService();
+        $service = new FIBAuthIntegrationService;
         $token = $service->getToken();
 
         // Assert
         $this->assertEquals('test-token', $token);
     }
 
-    public function test_it_throws_an_exception_when_token_retrieval_fails()
+    public function test_it_returns_null_when_token_retrieval_fails()
     {
         // Arrange
         Http::fake([
             'https://api.fib.com/login' => Http::response('Error message', 400),
         ]);
 
-        $this->expectException(Exception::class);
-        $this->expectExceptionMessage('Failed to retrieve access token.');
-
         // Act
-        $service = new FIBAuthIntegrationService();
-        $service->getToken();
+        $service = new FIBAuthIntegrationService;
+
+        $this->assertNull($service->getToken());
     }
 
-//        public function test_it_logs_and_throws_exception_on_error()
-//        {
-//            // Arrange
-//            Http::fake(function ($request) {
-//                throw new Exception('Network Error');
-//            });
-//
-//
-//            $this->expectException(Exception::class);
-//            $this->expectExceptionMessage('Network Error');
-//
-//            // Act
-//            $service = new FIBAuthIntegrationService();
-//            $service->getToken();
-//        }
+    //        public function test_it_logs_and_throws_exception_on_error()
+    //        {
+    //            // Arrange
+    //            Http::fake(function ($request) {
+    //                throw new Exception('Network Error');
+    //            });
+    //
+    //
+    //            $this->expectException(Exception::class);
+    //            $this->expectExceptionMessage('Network Error');
+    //
+    //            // Act
+    //            $service = new FIBAuthIntegrationService();
+    //            $service->getToken();
+    //        }
 
     public function test_it_sets_the_account()
     {
-        $service = new FIBAuthIntegrationService();
+        $service = new FIBAuthIntegrationService;
 
         // Use reflection to access the protected $account property
         $reflection = new \ReflectionClass($service);
