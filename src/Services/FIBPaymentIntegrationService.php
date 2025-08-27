@@ -128,7 +128,7 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
         try {
             $response = $this->postRequest("{$this->baseUrl}/payments/{$paymentId}/refund", []);
 
-            if ($response->accepted()) {
+            if ($response->status() == 202) {
                 $refundData = [
                     'status' => FibRefund::SUCCESS,
                 ];
