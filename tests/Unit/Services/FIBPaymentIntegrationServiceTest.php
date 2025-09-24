@@ -96,7 +96,7 @@ class FIBPaymentIntegrationServiceTest extends TestCase
 
         $paymentRepositoryMock->shouldReceive('updatePaymentStatus')
             ->once()
-            ->with('payment_id_123', FibPayment::REFUNDED);
+            ->with('payment_id_123', FibPayment::REFUND_REQUESTED);
 
         $responseMock = Mockery::mock('Illuminate\Http\Client\Response');
         $responseMock->shouldReceive('status')->andReturn(202);

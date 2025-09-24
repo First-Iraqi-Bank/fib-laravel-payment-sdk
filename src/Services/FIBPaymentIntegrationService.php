@@ -138,7 +138,7 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
                     'status' => FibRefund::SUCCESS,
                 ];
                 $this->fibPaymentRepository->updateOrCreateRefund($paymentId, $refundData);
-                $this->fibPaymentRepository->updatePaymentStatus($paymentId, FibPayment::REFUNDED);
+                $this->fibPaymentRepository->updatePaymentStatus($paymentId, FibPayment::REFUND_REQUESTED);
             } else {
                 $refundData = [
                     'fib_trace_id' => $response['traceId'],
