@@ -18,6 +18,8 @@ class FibPayment extends Model
 
     const DECLINED = 'DECLINED';
 
+    const REFUND_REQUESTED = 'REFUND_REQUESTED';
+
     const REFUNDED = 'REFUNDED';
 
     const CANCELED = 'CANCELED';
