@@ -52,10 +52,10 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
     /**
      * @throws Exception
      */
-    public function createPayment($amount, $callback = null, $description = null, $redirectUri = null, $extraData = null): PromiseInterface|Response|null
+    public function createPayment($amount, $callback = null, $description = null, $redirectUri = null, $extraData = null, $expiresIn = null): PromiseInterface|Response|null
     {
         try {
-            $data = $this->getPaymentData($amount, $callback, $description, $redirectUri, $extraData);
+            $data = $this->getPaymentData($amount, $callback, $description, $redirectUri, $extraData, $expiresIn);
 
             $paymentData = $this->postRequest("{$this->baseUrl}/payments", $data);
 
@@ -110,7 +110,7 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
         $this->fibPaymentRepository->updatePaymentStatus($paymentId, $status);
     }
 
-    public function getPaymentData($amount, $callback = null, $description = null, $redirectUri = null, $extraData = null): array
+    public function getPaymentData($amount, $callback = null, $description = null, $redirectUri = null, $extraData = null, $expiresIn = null): array
     {
         return [
             'monetaryValue' => [
@@ -121,6 +121,7 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
             'description' => $description ?? '',
             'redirectUri' => $redirectUri ?? '',
             'refundableFor' => config('fib.refundable_for'),
+            ...$expiresIn ? ['expiresIn' => $expiresIn] : [],
             ...$extraData ? ['extraData' => $extraData] : [],
         ];
     }
