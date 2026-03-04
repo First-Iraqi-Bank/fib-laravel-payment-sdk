@@ -5,6 +5,7 @@ namespace FirstIraqiBank\FIBPaymentSDK\Services;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class FIBAuthIntegrationService
 {
@@ -38,7 +39,6 @@ class FIBAuthIntegrationService
             $response = Http::asForm()
                 ->withoutVerifying()
                 ->withBasicAuth((string) config("fib.auth_accounts.{$this->account}.client_id"), (string) config("fib.auth_accounts.{$this->account}.secret"))
-                ->retry(times: 3, sleepMilliseconds: 100, throw: false)
                 ->post(config('fib.login'), [
                     'grant_type' => config('fib.grant'),
                 ]);
@@ -47,11 +47,6 @@ class FIBAuthIntegrationService
                 return $response->json('access_token');
             }
 
-            Log::error('Fib Payment SDK: Getting token failed', [
-                'status' => $response->status(),
-                'response_body' => $response->body(),
-            ]);
-
         } catch (Exception $e) {
 
             Log::error('Fib Payment SDK: Exception while getting token', ['exception' => $e]);
@@ -59,6 +54,11 @@ class FIBAuthIntegrationService
             throw $e;
         }
 
-        return null;
+        Log::error('Fib Payment SDK: Getting token failed', [
+            'status' => $response->status(),
+            'response_body' => $response->body(),
+        ]);
+
+        throw new HttpException(424, 'Fib Payment SDK: Getting token failed');
     }
 }
