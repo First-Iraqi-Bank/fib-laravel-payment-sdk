@@ -32,7 +32,6 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
 
         return retry(3, function () use ($url, $data, $token) {
             return Http::asJson()
-                ->withoutVerifying()
                 ->withToken($token)
                 ->post($url, $data);
         }, 100);
@@ -43,8 +42,7 @@ class FIBPaymentIntegrationService implements FIBPaymentIntegrationServiceInterf
         $token = $this->fibAuthIntegrationService->getToken();
 
         return retry(3, function () use ($url, $token) {
-            return Http::withoutVerifying()
-                ->withToken($token)
+            return Http::withToken($token)
                 ->get($url);
         }, 100);
     }

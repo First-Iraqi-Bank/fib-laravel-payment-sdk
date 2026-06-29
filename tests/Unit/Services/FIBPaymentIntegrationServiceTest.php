@@ -37,7 +37,6 @@ class FIBPaymentIntegrationServiceTest extends TestCase
         $responseMock->shouldReceive('successful')->andReturn(true);
         $responseMock->shouldReceive('json')->andReturn(['payment_id' => '12345']);
 
-        Http::shouldReceive('withoutVerifying')->andReturnSelf();
         Http::shouldReceive('asJson')->andReturnSelf();
         Http::shouldReceive('withToken')->with('test-token')->andReturnSelf();
         Http::shouldReceive('withOptions')->andReturnSelf(); // Add this line
@@ -69,7 +68,6 @@ class FIBPaymentIntegrationServiceTest extends TestCase
         $responseMock->shouldReceive('successful')->andReturn(true);
         $responseMock->shouldReceive('json')->andReturn(['status' => 'COMPLETED']);
 
-        Http::shouldReceive('withoutVerifying')->andReturnSelf();
         Http::shouldReceive('withToken')->with('test-token')->andReturnSelf();
         Http::shouldReceive('withOptions')->andReturnSelf(); // Add this line
         Http::shouldReceive('get')->andReturn($responseMock);
@@ -101,7 +99,6 @@ class FIBPaymentIntegrationServiceTest extends TestCase
         $responseMock = Mockery::mock('Illuminate\Http\Client\Response');
         $responseMock->shouldReceive('status')->andReturn(202);
 
-        Http::shouldReceive('withoutVerifying')->andReturnSelf();
         Http::shouldReceive('asJson')->andReturnSelf();
         Http::shouldReceive('withToken')->andReturnSelf();
         Http::shouldReceive('withOptions')->andReturnSelf(); // Add this line
@@ -130,7 +127,6 @@ class FIBPaymentIntegrationServiceTest extends TestCase
         $responseMock = Mockery::mock('Illuminate\Http\Client\Response');
         $responseMock->shouldReceive('status')->andReturn(204); // Simulate a 204 status for successful cancellation
 
-        Http::shouldReceive('withoutVerifying')->andReturnSelf();
         Http::shouldReceive('asJson')->andReturnSelf();
         Http::shouldReceive('withToken')->with('test_token')->andReturnSelf();
         Http::shouldReceive('withOptions')->andReturnSelf();
