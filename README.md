@@ -4,6 +4,7 @@ The FIB Laravel Payment SDK provides a seamless integration with the FIB payment
 
 **Table of Contents**
 - [Features](#features)
+- [Requirements](#requirements)
 - [Installation](#installation)
   - [Composer Installation](#composer-installation)
   - [Alternative Installation (Without Composer)](#alternative-installation-without-composer)
@@ -29,6 +30,11 @@ The FIB Laravel Payment SDK provides a seamless integration with the FIB payment
 - **Refund Processing**: Manage refunds through the FIB payment system with ease.
 - **Payment Status Checking**: Retrieve the status of payments to ensure proper transaction tracking.
 - **Payment Cancellation**: Cancel payments as needed through the FIB payment system.
+
+## Requirements
+
+- PHP 8.2 or higher
+- Laravel 10, 11, 12, or 13
 
 ## Installation
 

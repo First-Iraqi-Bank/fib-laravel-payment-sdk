@@ -63,12 +63,11 @@ class FIBAuthIntegrationServiceTest extends TestCase
             throw new Exception('Network Error');
         });
 
-
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Network Error');
 
         // Act
-        $service = new FIBAuthIntegrationService();
+        $service = new FIBAuthIntegrationService;
         $service->getToken();
     }
 

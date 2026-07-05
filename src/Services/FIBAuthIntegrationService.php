@@ -37,7 +37,6 @@ class FIBAuthIntegrationService
     {
         try {
             $response = Http::asForm()
-                ->withoutVerifying()
                 ->withBasicAuth((string) config("fib.auth_accounts.{$this->account}.client_id"), (string) config("fib.auth_accounts.{$this->account}.secret"))
                 ->post(config('fib.login'), [
                     'grant_type' => config('fib.grant'),
