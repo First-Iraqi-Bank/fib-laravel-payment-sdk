@@ -21,6 +21,7 @@
   "require": {
     "php": "^8.2",
     "ext-json": "*",
+    "doctrine/dbal": "^3.5.1 || ^4.0",
     "guzzlehttp/guzzle": "^7.0",
     "illuminate/contracts": "^10.0 || ^11.0 || ^12.0 || ^13.0",
     "illuminate/http": "^10.0 || ^11.0 || ^12.0 || ^13.0",

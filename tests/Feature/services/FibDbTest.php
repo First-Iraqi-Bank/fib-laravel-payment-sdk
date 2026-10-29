@@ -19,6 +19,17 @@ class FibDbTest extends TestCase
         ]);
     }
 
+    public function test_create_fib_payment_with_large_amount()
+    {
+        $largeAmount = 2241755759;
+        $fibPayment = FibPaymentFactoryHelper::createPayment(['amount' => $largeAmount]);
+
+        $this->assertDatabaseHas('fib_payments', [
+            'fib_payment_id' => $fibPayment->fib_payment_id,
+            'amount' => $largeAmount,
+        ]);
+    }
+
     public function test_create_fib_refund()
     {
         $fibRefund = FibPaymentFactoryHelper::createRefund();
