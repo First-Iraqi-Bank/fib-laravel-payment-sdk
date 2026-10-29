@@ -1,5 +1,5 @@
 # Use the PHP 8.1 FPM image as the base
-FROM php:8.1-fpm
+FROM php:8.2-fpm
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
